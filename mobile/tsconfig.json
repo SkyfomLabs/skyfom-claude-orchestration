@@ -1,0 +1,25 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-native",
+    "lib": ["ES2021"],
+    "target": "ES2021",
+    "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@features/*": ["src/features/*"],
+      "@entities/*": ["src/entities/*"],
+      "@shared/*": ["src/shared/*"],
+      "@widgets/*": ["src/widgets/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["node_modules"]
+}
