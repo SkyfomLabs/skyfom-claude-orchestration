@@ -1,0 +1,45 @@
+# State files (should not be committed)
+state/
+*.log
+events.jsonl
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build outputs (if any)
+dist/
+build/

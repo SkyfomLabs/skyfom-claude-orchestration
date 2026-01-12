@@ -1,0 +1,63 @@
+name: Publish Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate plugin.json
+        run: |
+          if [ ! -f ".claude-plugin/plugin.json" ]; then
+            echo "Error: plugin.json not found"
+            exit 1
+          fi
+          # Validate JSON syntax
+          jq empty .claude-plugin/plugin.json
+
+      - name: Check skill line counts
+        run: |
+          echo "Checking skill line counts (<200 lines required)..."
+          for skill in skills/skyfom-*/SKILL.md; do
+            if [ -f "$skill" ]; then
+              lines=$(wc -l < "$skill")
+              skill_name=$(basename $(dirname "$skill"))
+              echo "$skill_name: $lines lines"
+              if [ $lines -gt 200 ]; then
+                echo "Error: $skill_name exceeds 200 lines ($lines)"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Verify scripts are executable
+        run: |
+          find hooks/scripts -name "*.sh" -type f | while read script; do
+            if [ ! -x "$script" ]; then
+              echo "Warning: $script is not executable"
+              chmod +x "$script"
+            fi
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify publication
+        run: |
+          echo "Plugin published successfully!"
+          echo "Users can install with:"
+          echo "  npx claude-plugins install @${{ github.repository_owner }}/skyfom-claude-orchestration"
+          echo "  or"
+          echo "  /plugin marketplace add ${{ github.repository }}"

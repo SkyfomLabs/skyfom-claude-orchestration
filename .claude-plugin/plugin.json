@@ -1,0 +1,81 @@
+{
+  "name": "skyfom-orchestration",
+  "version": "1.0.0",
+  "displayName": "Skyfom Orchestration",
+  "description": "Multi-agent orchestration system for Claude Code with parallel development, automatic task management, and token optimization. Supports up to 7 parallel agents with code review loops, CI/CD integration, and comprehensive state management.",
+  "author": "Skyfom Team",
+  "repository": "https://github.com/YOUR_USERNAME/skyfom-claude-orchestration",
+  "homepage": "https://github.com/YOUR_USERNAME/skyfom-claude-orchestration",
+  "bugs": "https://github.com/YOUR_USERNAME/skyfom-claude-orchestration/issues",
+  "license": "MIT",
+  "keywords": [
+    "orchestration",
+    "multi-agent",
+    "automation",
+    "task-management",
+    "beads",
+    "parallel-development",
+    "code-review",
+    "token-optimization",
+    "ci-cd",
+    "workflow-automation"
+  ],
+  "claudeCode": {
+    "minVersion": "2.0.12"
+  },
+  "components": {
+    "commands": true,
+    "skills": true,
+    "hooks": true,
+    "mcp": false
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "beads-cli": "Required for task management (bd command)",
+    "gh": "Required for GitHub CLI integration",
+    "git": "Required for version control operations"
+  },
+  "categories": [
+    "Project Management",
+    "Automation",
+    "AI Agents",
+    "DevOps"
+  ],
+  "features": [
+    "Multi-agent parallel development (up to 7 agents)",
+    "Automatic code review loops (max 50 iterations)",
+    "Token optimization and tracking (100k ideal, 200k max)",
+    "Epic breakdown and task management via Beads",
+    "CI/CD integration with GitHub Actions",
+    "State management and event logging",
+    "Comprehensive skill system (12 specialized agents)",
+    "Hook-based validation and tracking"
+  ],
+  "skills": {
+    "skyfom-pm-agent-orchestrator": "Project Manager for multi-agent coordination",
+    "skyfom-cto": "Architect for epic breakdown and ADR creation",
+    "skyfom-frontend-developer": "React/Svelte frontend development",
+    "skyfom-backend-developer": "Bun/Hono/Rust backend development",
+    "skyfom-mobile-developer": "React Native with Expo mobile development",
+    "skyfom-desktop-developer": "Tauri/Electron desktop development",
+    "skyfom-devops": "Docker/Kubernetes/Terraform infrastructure",
+    "skyfom-qa": "Automated testing and quality assurance",
+    "skyfom-code-reviewer": "Multi-language code review and security",
+    "skyfom-research": "Competitor analysis and feature discovery",
+    "skyfom-designer": "UX/UI design specifications",
+    "skyfom-tokens-efficiency": "Token optimization and cost management"
+  },
+  "commands": {
+    "skyfom-orchestrate": "Start multi-agent orchestration for an epic",
+    "skyfom-stop-orchestrate": "Stop running orchestration gracefully"
+  },
+  "configuration": {
+    "maxParallelAgents": 7,
+    "maxCodeReviewLoops": 50,
+    "maxTokensPerAgent": 200000,
+    "tokenWarningThreshold": 160000,
+    "idealTokensPerAgent": 100000
+  }
+}
