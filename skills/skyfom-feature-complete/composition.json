@@ -1,0 +1,66 @@
+{
+  "name": "skyfom-feature-complete",
+  "description": "Complete feature implementation with development, testing, and documentation in parallel",
+  "version": "1.0.0",
+  "executionMode": "hybrid",
+  "maxParallel": 5,
+  "subSkills": [
+    {
+      "skillName": "skyfom-backend-developer",
+      "role": "Implement core backend functionality",
+      "dependencies": [],
+      "required": true,
+      "tokenEstimate": 50000,
+      "outputs": ["implementation", "api-routes"]
+    },
+    {
+      "skillName": "skyfom-frontend-developer",
+      "role": "Implement UI components",
+      "dependencies": [],
+      "required": true,
+      "tokenEstimate": 45000,
+      "outputs": ["components", "pages"]
+    },
+    {
+      "skillName": "skyfom-qa",
+      "role": "Create comprehensive test suite (unit, integration, E2E)",
+      "dependencies": ["skyfom-backend-developer", "skyfom-frontend-developer"],
+      "required": true,
+      "tokenEstimate": 40000,
+      "inputs": {
+        "requires": ["implementation", "components", "api-routes"]
+      },
+      "outputs": ["test-suite"]
+    },
+    {
+      "skillName": "skyfom-designer",
+      "role": "Create UI/UX specifications and style guide",
+      "dependencies": [],
+      "required": false,
+      "tokenEstimate": 25000,
+      "outputs": ["design-specs", "tokens"]
+    },
+    {
+      "skillName": "skyfom-code-reviewer",
+      "role": "Review code quality, security, and performance",
+      "dependencies": ["skyfom-backend-developer", "skyfom-frontend-developer"],
+      "required": true,
+      "tokenEstimate": 30000,
+      "inputs": {
+        "requires": ["implementation", "components"]
+      },
+      "outputs": ["review-report"]
+    }
+  ],
+  "coordinationStrategy": {
+    "errorHandling": "fail-fast",
+    "maxRetries": 2,
+    "timeout": 7200,
+    "resultsAggregation": "collect-all"
+  },
+  "metadata": {
+    "author": "Skyfom Team",
+    "tags": ["feature-complete", "parallel", "quality", "documentation"],
+    "documentation": "skills/skyfom-feature-complete/README.md"
+  }
+}

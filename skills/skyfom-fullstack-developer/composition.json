@@ -1,0 +1,48 @@
+{
+  "name": "skyfom-fullstack-developer",
+  "description": "Full-stack developer that orchestrates backend, frontend, and mobile development in parallel",
+  "version": "1.0.0",
+  "executionMode": "hybrid",
+  "maxParallel": 3,
+  "subSkills": [
+    {
+      "skillName": "skyfom-backend-developer",
+      "role": "Implement backend API endpoints, database schema, and business logic",
+      "dependencies": [],
+      "required": true,
+      "tokenEstimate": 75000,
+      "outputs": ["api-spec", "database-schema"]
+    },
+    {
+      "skillName": "skyfom-frontend-developer",
+      "role": "Implement web UI components and integrate with backend APIs",
+      "dependencies": ["skyfom-backend-developer"],
+      "required": true,
+      "tokenEstimate": 60000,
+      "inputs": {
+        "requires": ["api-spec"]
+      }
+    },
+    {
+      "skillName": "skyfom-mobile-developer",
+      "role": "Implement mobile app screens and integrate with backend APIs",
+      "dependencies": ["skyfom-backend-developer"],
+      "required": false,
+      "tokenEstimate": 65000,
+      "inputs": {
+        "requires": ["api-spec"]
+      }
+    }
+  ],
+  "coordinationStrategy": {
+    "errorHandling": "fail-fast",
+    "maxRetries": 1,
+    "timeout": 7200,
+    "resultsAggregation": "collect-all"
+  },
+  "metadata": {
+    "author": "Skyfom Team",
+    "tags": ["full-stack", "parallel", "multi-platform"],
+    "documentation": "skills/skyfom-fullstack-developer/README.md"
+  }
+}
