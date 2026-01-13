@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-01-13
+
 ### Added
 - **Autonomous Loop Control** - Inspired by Ralph for Claude Code
   - Agents loop automatically until task completion without manual intervention
@@ -260,8 +262,7 @@ New config options in `.claude/state/orchestration.json`:
 - **Security** - Security improvements
 
 
-[1.1.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.0.0...v1.1.0
-
-[Unreleased]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/releases/tag/v1.0.0

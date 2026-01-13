@@ -1,8 +1,8 @@
 {
   "name": "skyfom-orchestration",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "displayName": "Skyfom Orchestration",
-  "description": "Multi-agent orchestration system for Claude Code with parallel development, automatic task management, and token optimization. Supports up to 7 parallel agents with code review loops, CI/CD integration, and comprehensive state management.",
+  "description": "Autonomous multi-agent orchestration system for Claude Code with parallel development, loop control, and circuit breaker safety. Supports up to 7 parallel agents with autonomous task completion, rate limit resilience, and intelligent epic discovery. Inspired by Ralph for Claude Code.",
   "author": "Skyfom Team",
   "repository": "https://github.com/SkyfomLabs/skyfom-claude-orchestration",
   "homepage": "https://github.com/SkyfomLabs/skyfom-claude-orchestration",
@@ -44,8 +44,12 @@
     "DevOps"
   ],
   "features": [
+    "Autonomous loop control with dual-condition exit gate (EXIT_SIGNAL + completion indicators)",
+    "Circuit breaker protection (5 no-progress, 10 repeated errors)",
+    "Rate limit resilience with auto-retry every 60s",
     "Multi-agent parallel development (up to 7 agents)",
     "True parallel execution (single message, multiple Task calls)",
+    "Intelligent epic discovery and creation (optional epic ID)",
     "Composite skills with sub-skill orchestration",
     "Automatic code review loops (max 50 iterations)",
     "Token optimization and tracking (100k ideal, 200k max)",
