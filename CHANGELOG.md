@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-13
+
+### Added
+- **Project-Specific State Management** - Complete documentation and clarification
+  - `docs/PROJECT-SPECIFIC-STATE.md` - Comprehensive guide
+  - Each project maintains isolated state in `${CLAUDE_PROJECT_DIR}/.claude/state/`
+  - Prevents conflicts when working on multiple projects simultaneously
+  - State persists across sessions for the same project
+- **Clean Git History** - Removed unrelated commits from parallel execution development
+
+### Changed
+- Updated version to 1.1.0
+- All repository URLs now point to SkyfomLabs organization
+- Cleaner commit history focused on orchestration features only
+
+### Fixed
+- Repository URLs corrected to `github.com/SkyfomLabs/skyfom-claude-orchestration`
+- Removed accidental commits from agent spawning examples
+
 ## [1.0.0] - 2026-01-13
 
 ### Added
@@ -137,3 +156,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/skyfom/skyfom-claude-orchestration/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/skyfom/skyfom-claude-orchestration/releases/tag/v1.0.0
+
+[Unreleased]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.0.0...v1.1.0
