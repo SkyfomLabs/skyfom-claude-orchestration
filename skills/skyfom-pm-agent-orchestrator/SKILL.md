@@ -30,6 +30,71 @@ PM orchestrating parallel multi-agent development workflow.
 
 See `workflows/main-workflow.md` for detailed orchestration steps.
 
+### Autonomous Loop Control
+
+PM orchestrator operates in autonomous loop mode by default (unless `--manual` flag provided):
+
+1. **Loop until Epic Complete**:
+   - Continuously check for ready tasks
+   - Spawn available agents (max 7 parallel)
+   - Monitor agent progress
+   - Handle completions and failures
+   - Repeat until all tasks closed
+
+2. **Circuit Breaker Protection**:
+   - **No Progress** (5 loops): No new tasks completed, no PRs merged
+   - **Repeated Errors** (10 loops): Same blocking error persists
+   - **Action**: Circuit opens → escalate to human
+
+3. **Exit Condition (Dual-Condition Gate)**:
+   - ✅ All epic tasks closed (`bd dep tree <epic-id>` shows 100%)
+   - ✅ All PRs merged to main
+   - ✅ EXIT_SIGNAL: true in status report
+
+4. **Rate Limit Handling**:
+   - If API rate limit hit, auto-retry every 60 seconds
+   - Display countdown: "⏳ Rate limited. Retrying in 45 seconds (45s)"
+   - Continue indefinitely until limit clears
+
+See `workflows/autonomous-loop-workflow.md` for loop execution patterns.
+
+### Phase 0: Epic Discovery (if no epic provided)
+
+**When `/skyfom-orchestrate` is called without epic ID:**
+
+1. **Check for Ready Epics**
+   ```bash
+   bd list --type epic --status ready --json
+   ```
+   - If epics found → Select highest priority
+   - Parse priority from epic metadata or tags
+   - Review epic details to confirm readiness
+
+2. **No Ready Epics → Create with CTO**
+   - Spawn `/skyfom-cto` for epic planning:
+     ```
+     Use Task tool to spawn skyfom-cto:
+     - prompt: "Analyze project needs and create a new epic. Review backlog, identify high-priority work, and create epic with breakdown."
+     - description: "Create new epic for orchestration"
+     ```
+   - CTO analyzes project:
+     - Reviews existing code and issues
+     - Identifies high-priority improvements
+     - Creates epic with clear acceptance criteria
+   - CTO creates epic in Beads:
+     ```bash
+     bd create "Epic: [Title]" -t epic --description "..." --json
+     ```
+
+3. **Save Epic to State**
+   ```bash
+   # Update orchestration state
+   jq '.epicId = "bd-epic-xxx"' .claude/state/orchestration.json > tmp.json
+   mv tmp.json .claude/state/orchestration.json
+   ```
+
+4. **Proceed to Phase 1** with selected/created epic
+
 ### Phase 1: Epic Analysis
 1. Read epic from Beads: `bd show <epic-id> --json`
 2. Extract requirements and acceptance criteria
@@ -70,7 +135,28 @@ See `workflows/main-workflow.md` for detailed orchestration steps.
 1. Verify all tasks merged to main
 2. Run integration tests
 3. Update epic status
-4. If configured, auto-restart for next phase
+4. Output loop status with EXIT_SIGNAL
+
+**Loop Status Report**:
+```markdown
+## PM Loop Status
+
+**Iteration**: [current loop]
+**Progress**: [tasks completed this iteration]
+**Circuit State**: [closed | open]
+**Epic Status**: [X/Y tasks complete]
+
+### Completion Indicators
+- [x] All tasks closed
+- [x] All PRs merged
+- [x] Integration tests passing
+- [x] Epic marked complete
+
+### Exit Decision
+EXIT_SIGNAL: true
+
+**Reason**: Epic fully complete, all acceptance criteria met
+```
 
 ## Beads Commands
 
@@ -133,13 +219,22 @@ Works with orchestration system:
 ## Quick Reference
 
 ```bash
-# Start orchestration
+# Start orchestration with specific epic
 /skyfom-orchestrate bd-epic-auth
+
+# Start orchestration - PM discovers/creates epic
+/skyfom-orchestrate
+
+# Manual mode
+/skyfom-orchestrate --manual
 
 # Monitor status
 cat .claude/state/orchestration.json
 cat .claude/state/agents.json
 tail -f .claude/state/events.jsonl
+
+# Check ready epics
+bd list --type epic --status ready --json
 
 # Stop orchestration
 /skyfom-stop-orchestrate

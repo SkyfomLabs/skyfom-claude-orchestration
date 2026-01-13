@@ -33,7 +33,7 @@ export class StateManager {
 
   private async createInitialState(): Promise<void> {
     this.state = {
-      version: '1.0.0',
+      version: '1.1.0',
       startedAt: new Date().toISOString(),
       phase: 'idle',
       status: 'idle',
@@ -44,6 +44,17 @@ export class StateManager {
         tokenWarningThreshold: 160000,
         autoRestart: false,
         humanApprovalRequired: true,
+        autonomousMode: true,
+        circuitBreaker: {
+          maxNoProgressLoops: 5,
+          maxRepeatedErrorLoops: 10,
+          enabled: true,
+        },
+        rateLimiter: {
+          enabled: true,
+          retryDelaySeconds: 60,
+          maxRetries: -1,
+        },
       },
       agents: [],
       tasks: [],
@@ -52,6 +63,10 @@ export class StateManager {
         totalTasksCompleted: 0,
         totalTokensUsed: 0,
         averageReviewLoops: 0,
+        totalLoops: 0,
+        circuitBreakerTrips: 0,
+        rateLimitHits: 0,
+        averageLoopsPerTask: 0,
       },
     };
 
@@ -196,6 +211,92 @@ export class StateManager {
 
   async reset(): Promise<void> {
     await this.createInitialState();
+  }
+
+  /**
+   * Update agent loop state
+   */
+  async updateAgentLoopState(
+    agentId: string,
+    loopState: Partial<import('./types').AgentLoopState>
+  ): Promise<void> {
+    if (!this.state) {
+      throw new Error('State not initialized');
+    }
+
+    const agent = this.state.agents.find((a) => a.id === agentId);
+    if (!agent) {
+      throw new Error(`Agent ${agentId} not found`);
+    }
+
+    agent.loopState = {
+      ...agent.loopState,
+      ...loopState,
+    } as import('./types').AgentLoopState;
+
+    await this.save();
+  }
+
+  /**
+   * Increment loop metrics
+   */
+  async incrementLoopMetrics(
+    loops: number = 1,
+    circuitBreakerTrip: boolean = false
+  ): Promise<void> {
+    if (!this.state) {
+      throw new Error('State not initialized');
+    }
+
+    this.state.metrics.totalLoops += loops;
+
+    if (circuitBreakerTrip) {
+      this.state.metrics.circuitBreakerTrips++;
+    }
+
+    // Update average loops per task
+    if (this.state.metrics.totalTasksCompleted > 0) {
+      this.state.metrics.averageLoopsPerTask =
+        this.state.metrics.totalLoops / this.state.metrics.totalTasksCompleted;
+    }
+
+    await this.save();
+  }
+
+  /**
+   * Increment rate limit hits
+   */
+  async incrementRateLimitHits(): Promise<void> {
+    if (!this.state) {
+      throw new Error('State not initialized');
+    }
+
+    this.state.metrics.rateLimitHits++;
+    await this.save();
+  }
+
+  /**
+   * Get agents with open circuit breaker
+   */
+  async getCircuitOpenAgents(): Promise<import('./types').AgentState[]> {
+    if (!this.state) {
+      throw new Error('State not initialized');
+    }
+
+    return this.state.agents.filter(
+      (a) => a.loopState?.circuitState === 'open'
+    );
+  }
+
+  /**
+   * Check if autonomous mode is enabled
+   */
+  isAutonomousMode(): boolean {
+    if (!this.state) {
+      throw new Error('State not initialized');
+    }
+
+    return this.state.config.autonomousMode ?? true;
   }
 }
 

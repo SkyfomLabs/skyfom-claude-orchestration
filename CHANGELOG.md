@@ -7,6 +7,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Autonomous Loop Control** - Inspired by Ralph for Claude Code
+  - Agents loop automatically until task completion without manual intervention
+  - PM orchestrator loops continuously until epic complete
+  - Dual-condition exit gate: EXIT_SIGNAL + >= 2 completion indicators
+  - Progress tracking via output hashing
+  - Semantic completion pattern detection (10 patterns)
+- **Circuit Breaker Protection** - Prevents infinite loops and API exhaustion
+  - No Progress Breaker: Opens after 5 consecutive loops with no progress
+  - Repeated Error Breaker: Opens after 10 consecutive loops with same error
+  - Circuit states: closed, half_open, open
+  - Automatic escalation to human on circuit open
+- **Rate Limit Resilience** - Automatic retry with countdown
+  - Auto-retry every 60 seconds when rate limit hit
+  - Infinite retries until API access restored
+  - User-friendly countdown display: "⏳ Rate limited. Retrying in 45s (45s)"
+  - Global rate limiter shared across all agents
+- **Loop State Tracking** - Comprehensive loop metrics
+  - Per-agent loop state in `.claude/state/agents.json`
+  - Loop metrics: totalLoops, circuitBreakerTrips, rateLimitHits, averageLoopsPerTask
+  - Loop events logged to `.claude/state/events.jsonl`
+  - New event types: loop_iteration, circuit_breaker_open, rate_limit_hit, exit_signal_detected
+- **Loop Manager** (`orchestrator/loop-manager.ts`)
+  - `analyzeExitCondition()` - Dual-condition gate validation
+  - `detectProgress()` - Hash-based progress detection
+  - `detectRepeatedError()` - Error pattern tracking
+  - `updateLoopState()` - Circuit breaker logic
+- **Rate Limiter** (`orchestrator/rate-limiter.ts`)
+  - `checkRateLimit()` - Rate limit status check
+  - `triggerRateLimit()` - Trigger retry countdown
+  - `waitForRateLimit()` - Auto-retry with sleep
+  - `isRateLimitError()` - Detect rate limit errors
+- **Loop Monitoring Hooks**
+  - `track-loop-iteration.py` - PostToolUse hook for loop tracking
+  - Detects EXIT_SIGNAL and completion indicators
+  - Logs circuit breaker and rate limit events
+  - Updates loop metrics in real-time
+- **Epic Discovery Workflow** - Smart epic selection
+  - PM checks for ready epics via `bd list --type epic --status ready`
+  - Selects highest priority epic automatically
+  - If no ready epics, spawns CTO to create one
+  - CTO analyzes project needs and creates epic with breakdown
+  - Epic ID auto-saved to orchestration state
+- **Documentation**
+  - `skills/workflows/autonomous-loop-workflow.md` - Complete loop execution guide
+  - Updated PM orchestrator with Phase 0: Epic Discovery
+  - Updated command documentation with epicless mode examples
+  - Added examples: `/skyfom-orchestrate` without arguments
+
+### Changed
+- **Default Mode**: Autonomous by default (was manual approval between phases)
+  - Old: `--no-human-verify` flag for autonomous mode
+  - New: `--manual` flag for manual mode (default: autonomous)
+- **Epic ID**: Now optional in `/skyfom-orchestrate` command
+  - When omitted: PM discovers ready epic or creates one with CTO
+  - Added Phase 0: Epic Discovery workflow
+  - Auto-saves discovered/created epic ID to state
+- **State Version**: Bumped to 1.1.0 with new loop fields
+  - Added `autonomousMode`, `circuitBreaker`, `rateLimiter` to config
+  - Added `loopState` to AgentState
+  - Added loop metrics: totalLoops, circuitBreakerTrips, rateLimitHits, averageLoopsPerTask
+- **Agent Status**: New `circuit_open` status for agents with open circuit breaker
+- **Session Initialization**: Updated hooks to initialize loop config fields
+
+### Configuration
+New config options in `.claude/state/orchestration.json`:
+```json
+{
+  "config": {
+    "autonomousMode": true,
+    "circuitBreaker": {
+      "maxNoProgressLoops": 5,
+      "maxRepeatedErrorLoops": 10,
+      "enabled": true
+    },
+    "rateLimiter": {
+      "enabled": true,
+      "retryDelaySeconds": 60,
+      "maxRetries": -1
+    }
+  }
+}
+```
+
+### Performance
+- **Uninterrupted Execution**: Agents work 24/7 without manual approval gates
+- **Automatic Recovery**: Rate limit auto-retry eliminates manual intervention
+- **Safety Guarantees**: Circuit breaker prevents wasted API tokens on stuck tasks
+
+### Comparison with Ralph for Claude Code
+**Adopted from Ralph**:
+- Dual-condition exit gate (EXIT_SIGNAL + completion indicators)
+- Circuit breaker with no-progress and repeated-error detection
+- Rate limit handling with auto-retry
+- Progress tracking via hashing
+- Semantic pattern matching for completion
+
+**Skyfom Enhancements**:
+- Multi-agent parallel execution (7 agents vs Ralph's 1)
+- Nested loops (PM level + agent level)
+- Task tracker integration (Beads)
+- Per-agent circuit breakers
+- Global rate limiter across parallel agents
+- Loop state persistence in JSON
+
 ## [1.1.0] - 2026-01-13
 
 ### Added
@@ -154,8 +259,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed** - Bug fixes
 - **Security** - Security improvements
 
-[Unreleased]: https://github.com/skyfom/skyfom-claude-orchestration/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/skyfom/skyfom-claude-orchestration/releases/tag/v1.0.0
+
+[1.1.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.0.0...v1.1.0
 
 [Unreleased]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/SkyfomLabs/skyfom-claude-orchestration/releases/tag/v1.0.0

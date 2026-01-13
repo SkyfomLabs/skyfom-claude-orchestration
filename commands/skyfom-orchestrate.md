@@ -1,23 +1,27 @@
 ---
 description: Orchestrate multi-agent parallel development with automatic task management
 allowed-tools: Task(*), Bash(bd:*), Bash(git:*), Bash(gh:*), Read, Write
-argument-hint: [epic-id] [--no-human-verify]
+argument-hint: [epic-id] [--manual]
 model: claude-sonnet-4-5-20250929
 ---
 
 # Skyfom Orchestration
 
-Multi-agent orchestration system for parallel task execution with code review loops and CI/CD integration.
+Multi-agent orchestration system for parallel task execution with autonomous loop control, code review loops, and CI/CD integration.
 
 ## Arguments
-- **$1**: Epic/Phase ID (e.g., "bd-epic-auth", "phase-2")
-- **--no-human-verify**: Run fully autonomous without human approval between phases
+- **$1**: Epic/Phase ID (optional) (e.g., "bd-epic-auth", "phase-2")
+  - If provided: Orchestrate specific epic
+  - If omitted: PM discovers ready epic or creates one with CTO
+- **--manual**: Run with human approval between phases (default: autonomous mode)
 
 ## Pre-Orchestration Context
 
-**Epic**: !`bd show $1 --json 2>/dev/null || echo "{}"`
+**Epic (if provided)**: !`if [ -n "$1" ] && [ "$1" != "--manual" ]; then bd show $1 --json 2>/dev/null || echo '{"error":"Epic not found"}'; else echo '{"mode":"discovery"}'; fi`
 
-**Ready Tasks**: !`bd ready --json | head -20`
+**Ready Epics**: !`bd list --type epic --status ready --json 2>/dev/null | head -10`
+
+**Ready Tasks**: !`bd ready --json 2>/dev/null | head -20`
 
 **Active Branches**: !`git branch | head -10`
 
@@ -25,10 +29,39 @@ Multi-agent orchestration system for parallel task execution with code review lo
 
 ## Orchestration Workflow
 
+### Phase 0: Epic Discovery (if epic ID not provided)
+
+**If no epic ID provided, PM agent must first discover or create epic:**
+
+1. **Check for Ready Epics**
+   ```bash
+   bd list --type epic --status ready --json
+   ```
+
+2. **Epic Found** → Select highest priority epic
+   - Review epic details: `bd show <epic-id> --json`
+   - Confirm epic is ready to start
+   - Proceed to Phase 1 with selected epic
+
+3. **No Ready Epics Found** → Create New Epic with CTO
+   - Spawn `/skyfom-cto` agent for epic planning
+   - CTO analyzes project needs, reviews backlog
+   - CTO creates new epic with breakdown:
+     ```bash
+     bd create "Epic Title" -t epic --description "..." --json
+     ```
+   - Add acceptance criteria and deliverables
+   - Set epic status to ready
+   - Proceed to Phase 1 with new epic
+
+4. **Save Epic ID to State**
+   - Update `.claude/state/orchestration.json` with selected/created epic ID
+   - Log epic selection event to `events.jsonl`
+
 ### Phase 1: Task Planning & Breakdown
 
 1. **Read Epic Requirements**
-   - Parse epic from Beads: `bd show $1 --json`
+   - Parse epic from Beads: `bd show <epic-id> --json`
    - Extract acceptance criteria and deliverables
    - Identify technical constraints
 
@@ -52,6 +85,8 @@ Multi-agent orchestration system for parallel task execution with code review lo
 ### Phase 2: Agent Spawning (Fork Workflow)
 
 **Max Parallel Agents**: 7
+
+**Autonomous Loop Control**: Agents loop automatically until task completion with circuit breaker safety (5 no-progress loops, 10 repeated error loops).
 
 For each ready task (up to 7 in parallel):
 
@@ -161,9 +196,9 @@ PM Agent reviews completed work:
    - **Incomplete** → Continue orchestration
 
 4. **Auto-Restart** (if configured)
-   - Check: `.claude/state/orchestration.json` → `config.autoRestart`
-   - If `true` and `--no-human-verify` → Restart from Phase 1
-   - If `false` → Await human approval → Restart
+   - Check: `.claude/state/orchestration.json` → `config.autonomousMode`
+   - If `true` (default, unless `--manual` flag) → Restart from Phase 1
+   - If `false` (with `--manual` flag) → Await human approval → Restart
 
 ## State Management
 
@@ -180,7 +215,17 @@ All state in `.claude/state/`:
     "maxTokensPerAgent": 200000,
     "tokenWarningThreshold": 160000,
     "autoRestart": false,
-    "humanApprovalRequired": true
+    "autonomousMode": true,
+    "circuitBreaker": {
+      "maxNoProgressLoops": 5,
+      "maxRepeatedErrorLoops": 10,
+      "enabled": true
+    },
+    "rateLimiter": {
+      "enabled": true,
+      "retryDelaySeconds": 60,
+      "maxRetries": -1
+    }
   },
   "agents": [...],
   "tasks": [...],
@@ -195,22 +240,39 @@ All state in `.claude/state/`:
 - **Warning**: 160k tokens → Create summary, spawn new agent
 - **Tracking**: Update after each agent completion
 
-## Error Handling
+## Error Handling & Circuit Breaker
 
-- **Agent stuck** (>2hrs) → Escalate to human
+- **No progress** (5 consecutive loops) → Circuit breaker opens, escalate to human
+- **Repeated errors** (10 consecutive loops) → Circuit breaker opens, escalate to human
+- **Rate limit hit** → Auto-retry every 60 seconds until cleared
 - **Review loop limit** (50) → Escalate to human
 - **CI failure** (5x) → Escalate to human
 - **Merge conflict** → Developer resolves, PM re-reviews
+
+### Exit Detection (Dual-Condition Gate)
+
+Agents must meet BOTH conditions to exit loop:
+1. **EXIT_SIGNAL: true** - Explicit signal from agent
+2. **>= 2 completion indicators** - Patterns like "task complete", "PR merged", "all done"
 
 ## Execution
 
 Start orchestration with:
 ```bash
-# With human approval between phases
+# With specific epic - autonomous mode (default)
 /skyfom-orchestrate bd-epic-auth
 
-# Fully autonomous
-/skyfom-orchestrate bd-epic-auth --no-human-verify
+# Without epic - PM discovers or creates epic
+/skyfom-orchestrate
+
+# Manual mode - requires human approval between phases
+/skyfom-orchestrate bd-epic-auth --manual
+/skyfom-orchestrate --manual
+
+# Examples
+/skyfom-orchestrate                    # PM finds/creates epic, runs autonomously
+/skyfom-orchestrate bd-epic-123        # Specific epic, autonomous
+/skyfom-orchestrate --manual           # PM finds/creates epic, manual approval
 ```
 
 Monitor progress:

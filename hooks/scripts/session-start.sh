@@ -11,7 +11,7 @@ ORCH_FILE="$STATE_DIR/orchestration.json"
 if [ ! -f "$ORCH_FILE" ]; then
   cat > "$ORCH_FILE" <<'EOF'
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "startedAt": "",
   "phase": "idle",
   "status": "idle",
@@ -22,7 +22,18 @@ if [ ! -f "$ORCH_FILE" ]; then
     "maxTokensPerAgent": 200000,
     "tokenWarningThreshold": 160000,
     "autoRestart": false,
-    "humanApprovalRequired": true
+    "humanApprovalRequired": true,
+    "autonomousMode": true,
+    "circuitBreaker": {
+      "maxNoProgressLoops": 5,
+      "maxRepeatedErrorLoops": 10,
+      "enabled": true
+    },
+    "rateLimiter": {
+      "enabled": true,
+      "retryDelaySeconds": 60,
+      "maxRetries": -1
+    }
   },
   "agents": [],
   "tasks": [],
@@ -30,7 +41,11 @@ if [ ! -f "$ORCH_FILE" ]; then
     "totalAgentsSpawned": 0,
     "totalTasksCompleted": 0,
     "totalTokensUsed": 0,
-    "averageReviewLoops": 0
+    "averageReviewLoops": 0,
+    "totalLoops": 0,
+    "circuitBreakerTrips": 0,
+    "rateLimitHits": 0,
+    "averageLoopsPerTask": 0
   }
 }
 EOF

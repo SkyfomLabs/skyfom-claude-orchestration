@@ -44,6 +44,12 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/track-agent-completion.sh",
             "timeout": 60,
             "description": "Track agent completion and update metrics"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/track-loop-iteration.py",
+            "timeout": 30,
+            "description": "Track loop iterations and circuit breaker state"
           }
         ]
       }
