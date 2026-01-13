@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skyfom Skill Composition Schema",
+  "description": "Schema for defining composite skills that orchestrate multiple sub-skills",
+  "type": "object",
+  "required": ["name", "description", "subSkills", "executionMode"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique name for this composite skill",
+      "pattern": "^skyfom-[a-z0-9-]+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of what this composite skill does"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this composition",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "default": "1.0.0"
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["parallel", "sequential", "hybrid"],
+      "description": "How sub-skills are executed: parallel (all at once), sequential (one after another), hybrid (respects dependencies)"
+    },
+    "maxParallel": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7,
+      "default": 7,
+      "description": "Maximum number of sub-skills to execute in parallel"
+    },
+    "subSkills": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Array of sub-skills that comprise this composite skill",
+      "items": {
+        "type": "object",
+        "required": ["skillName", "role", "required"],
+        "properties": {
+          "skillName": {
+            "type": "string",
+            "description": "Name of the sub-skill to invoke (must exist in skills/ directory)"
+          },
+          "role": {
+            "type": "string",
+            "description": "Specific role this sub-skill plays in the composition"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of other sub-skill names this skill depends on (must complete first)"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this sub-skill must complete successfully (true) or is optional (false)"
+          },
+          "tokenEstimate": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 200000,
+            "description": "Estimated token usage for this sub-skill"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "Input data to pass to this sub-skill",
+            "additionalProperties": true
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of outputs this sub-skill produces for other sub-skills to consume"
+          }
+        }
+      }
+    },
+    "coordinationStrategy": {
+      "type": "object",
+      "description": "How the composite skill coordinates sub-skills",
+      "properties": {
+        "errorHandling": {
+          "type": "string",
+          "enum": ["fail-fast", "continue-on-error", "retry"],
+          "default": "fail-fast",
+          "description": "What to do when a required sub-skill fails"
+        },
+        "maxRetries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "default": 0,
+          "description": "Maximum retries for failed sub-skills"
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 60,
+          "description": "Timeout in seconds for each sub-skill (0 = no timeout)"
+        },
+        "resultsAggregation": {
+          "type": "string",
+          "enum": ["collect-all", "first-success", "majority-vote"],
+          "default": "collect-all",
+          "description": "How to aggregate results from multiple sub-skills"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata about this composition",
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "documentation": {
+          "type": "string",
+          "description": "Path to detailed documentation"
+        }
+      }
+    }
+  }
+}

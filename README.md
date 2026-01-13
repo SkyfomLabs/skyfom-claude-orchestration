@@ -4,34 +4,38 @@
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-v2.0.12+-blue)](https://claude.ai/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/YOUR_USERNAME/skyfom-claude-orchestration/releases)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/skyfom/skyfom-claude-orchestration/releases)
 
 ## 🌟 Overview
 
 Skyfom Orchestration transforms Claude Code into a powerful multi-agent development system. It orchestrates up to **7 parallel AI agents**, each specialized in different domains (frontend, backend, mobile, DevOps, etc.), working together to complete epics efficiently.
 
+**New in v1.0**: **True parallel execution** with composite skills - achieve **7x speedup** by spawning multiple agents simultaneously. Features skill composition with automatic dependency resolution for complex multi-platform features.
+
 ### Key Highlights
 
-- 🤖 **12 Specialized Agent Skills** - PM, CTO, Frontend, Backend, Mobile, Desktop, DevOps, QA, Code Reviewer, Research, Designer, Token Efficiency
+- 🤖 **14 Specialized Skills** - PM, CTO, Frontend, Backend, Mobile, Desktop, DevOps, QA, Code Reviewer, Research, Designer, Token Efficiency, Full-Stack, Feature-Complete
+- ⚡ **True Parallel Execution** - Single message, multiple Task calls for 7x speedup
 - 🔄 **Automatic Code Review** - Up to 50 review loops until code meets quality standards
 - 📊 **Token Optimization** - Smart tracking and management (100k ideal, 200k max per agent)
 - 🎯 **Epic Breakdown** - Automatic task splitting via Beads issue tracker
 - ✅ **CI/CD Integration** - GitHub Actions workflow integration
 - 🔧 **Hook System** - Validation and tracking at every step
+- 🔀 **Skill Composition** - Composite skills with sub-skill orchestration
 
 ## 📦 Installation
 
 ### Option 1: Via NPM (Recommended)
 
 ```bash
-npx claude-plugins install @YOUR_USERNAME/skyfom-claude-orchestration
+npx claude-plugins install @skyfom/skyfom-claude-orchestration
 ```
 
 ### Option 2: Via Claude Code Plugin Command
 
 ```bash
 # Add marketplace
-/plugin marketplace add YOUR_USERNAME/skyfom-claude-orchestration
+/plugin marketplace add skyfom/skyfom-claude-orchestration
 
 # Install plugin
 /plugin install skyfom-orchestration
@@ -41,7 +45,7 @@ npx claude-plugins install @YOUR_USERNAME/skyfom-claude-orchestration
 
 ```bash
 # Clone into your project's .claude directory
-git clone https://github.com/YOUR_USERNAME/skyfom-claude-orchestration.git .claude
+git clone https://github.com/skyfom/skyfom-claude-orchestration.git .claude
 
 # Make scripts executable
 chmod +x .claude/hooks/scripts/*.sh
@@ -141,7 +145,9 @@ The system intelligently manages token usage:
 - **200k tokens** - Hard limit (spawns new agent)
 - **Auto-splitting** - Tasks >100k automatically split
 
-### 12 Specialized Skills
+### 14 Specialized Skills
+
+#### Atomic Skills (12)
 
 | Skill | Role | Tech Stack |
 |-------|------|------------|
@@ -157,6 +163,13 @@ The system intelligently manages token usage:
 | **Research** | Competitor analysis | Web search, market research |
 | **Designer** | UI/UX specifications | Tailwind tokens, component specs |
 | **Token Efficiency** | Cost optimization | Token tracking, auto-splitting |
+
+#### Composite Skills (2)
+
+| Skill | Role | Sub-Skills |
+|-------|------|------------|
+| **Full-Stack Developer** | Multi-platform features | Backend → Frontend + Mobile (parallel) |
+| **Feature-Complete** | Production-ready delivery | Development → QA + Review (parallel) |
 
 ## 📋 Requirements
 
@@ -232,10 +245,31 @@ jq '.[] | {id, tokenUsage}' .claude/state/agents.json
 
 - [**Installation Guide**](docs/INSTALLATION.md) - Detailed setup instructions
 - [**User Guide**](docs/USER_GUIDE.md) - Complete usage documentation
-- [**Architecture**](ORCHESTRATION_IMPLEMENTATION.md) - System design and implementation
-- [**Skill Reference**](docs/SKILLS.md) - All 12 agent skills explained
-- [**API Reference**](docs/API.md) - Hook system and state management
-- [**Troubleshooting**](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [**Parallel Execution**](docs/PARALLEL-EXECUTION.md) - Comprehensive parallel execution guide
+- [**Implementation Summary**](PARALLEL-EXECUTION-IMPLEMENTATION.md) - System architecture and implementation
+- [**Developer Guide**](CLAUDE.md) - Guide for working with this codebase
+- [**Orchestrator Framework**](orchestrator/README.md) - Parallel execution framework reference
+
+## ⚡ Parallel Execution System
+
+Skyfom Orchestration supports **three levels of parallelism**:
+
+### Level 1: PM Parallel Orchestration
+The PM orchestrator spawns up to **7 developers simultaneously** using a single message with multiple Task calls.
+
+**Performance**: 7x faster than sequential execution
+
+### Level 2: Skill Composition
+Composite skills orchestrate multiple sub-skills with automatic dependency resolution:
+- **Full-Stack Developer**: Backend first, then Frontend + Mobile in parallel
+- **Feature-Complete**: Development + Design in parallel, then QA + Review in parallel
+
+### Level 3: Sub-Skill Spawning
+Any skill can spawn specialized sub-agents for parallel subtasks (e.g., Component + Tests + Docs).
+
+**Critical Pattern**: Always spawn parallel agents in **SINGLE message with MULTIPLE Task calls** for true parallelism.
+
+See [Parallel Execution Guide](docs/PARALLEL-EXECUTION.md) for complete details.
 
 ## 🎓 Examples
 
@@ -286,7 +320,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/skyfom-claude-orchestration.git
+git clone https://github.com/skyfom/skyfom-claude-orchestration.git
 cd skyfom-claude-orchestration
 
 # Make scripts executable
@@ -339,15 +373,15 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 📮 Support
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/skyfom-claude-orchestration/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/skyfom-claude-orchestration/discussions)
-- **Documentation**: [Full Docs](https://github.com/YOUR_USERNAME/skyfom-claude-orchestration/tree/main/docs)
+- **Issues**: [GitHub Issues](https://github.com/skyfom/skyfom-claude-orchestration/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/skyfom/skyfom-claude-orchestration/discussions)
+- **Documentation**: [Full Docs](https://github.com/skyfom/skyfom-claude-orchestration/tree/main/docs)
 
 ## 🌟 Star History
 
 If you find this plugin useful, please consider giving it a star!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=YOUR_USERNAME/skyfom-claude-orchestration&type=Date)](https://star-history.com/#YOUR_USERNAME/skyfom-claude-orchestration&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=skyfom/skyfom-claude-orchestration&type=Date)](https://star-history.com/#skyfom/skyfom-claude-orchestration&Date)
 
 ---
 
